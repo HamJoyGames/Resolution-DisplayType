@@ -11,6 +11,8 @@ using UnityEngine.UI;
 
 public class Settings : MonoBehaviour
 {
+    // Buttons
+    [SerializeField] private Button btnExit;
 
     // Dropdowns
     [SerializeField] private Dropdown ddVideoResolutions;
@@ -23,8 +25,8 @@ public class Settings : MonoBehaviour
     [SerializeField] private int maximumPopUpTimer = 10;
     [SerializeField] private Text txtCountDown;
 
-    [SerializeField] private List<Resolution> storeResolutions;
-
+    // Private variables
+    private List<Resolution> storeResolutions;
     private int prevDisplayTypeIndex;
     private int prevResolutionIndex;
     private FullScreenMode screenMode;
@@ -69,7 +71,12 @@ public class Settings : MonoBehaviour
     // Determines what display type that we should use
     void DisplayType(string mode)
     {
-        if (mode == "Exclusive Fullscreen")
+        // Known bug: If you ever lose focus of the game (alt tabing, task manager) while in exclusive full screen and close the game (end task, close window, etc),
+        // the fullscreen mode registry will save it as a value of 3 (windowed) instead of 0 (exclusive full screen).
+        // Therefore, when you reopen the game, it returns to windowed mode.
+        // If you leave the game through the in game button, this doesn't happen.
+        // I do not know why this interaction occurs. This is partially solved with binary file saving.
+        if (mode == "ExclusiveFullScreen")
         {
             ddDisplay.value = 0;
             screenMode = FullScreenMode.ExclusiveFullScreen;
@@ -185,10 +192,13 @@ public class Settings : MonoBehaviour
     void Initialize()
     {
         FindResolutions();
+        Debug.Log("Initialize: " + Screen.fullScreenMode.ToString());
         DisplayType(Screen.fullScreenMode.ToString());
 
         prevDisplayTypeIndex = ddDisplay.value;
         prevResolutionIndex = ddVideoResolutions.value;
+
+        btnExit.onClick.AddListener(delegate { Application.Quit(); });
     }
 
     // Assigning button listeners
